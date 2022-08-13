@@ -36,8 +36,10 @@ namespace Oxide.Plugins
         private readonly Dictionary<string, string> OffsetYByLootPanel = new Dictionary<string, string>
         {
             ["dropboxcontents"] = (BaseYOffset + YOffsetPerRow * 2).ToString(),
+            ["furnace"] = "277",
             ["generic"] = (BaseYOffset + YOffsetPerRow * 6).ToString(),
             ["genericsmall"] = (BaseYOffset + YOffsetPerRow).ToString(),
+            ["largefurnace"] = "395",
             ["toolcupboard"] = "560",
             ["vendingmachine.storage"] = (BaseYOffset + YOffsetPerRow * 5).ToString(),
         };
@@ -56,8 +58,10 @@ namespace Oxide.Plugins
         // Since 2020/08, some loot panels still use 21px, while most other panels use 23px.
         private readonly Dictionary<string, string> HeightOverrideByLootPanel = new Dictionary<string, string>
         {
-            ["toolcupboard"] = "21",
             ["dropboxcontents"] = "21",
+            ["furnace"] = "21",
+            ["largefurnace"] = "21",
+            ["toolcupboard"] = "21",
             ["vendingmachine.storage"] = "21",
         };
 
