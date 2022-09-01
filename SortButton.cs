@@ -125,6 +125,12 @@ namespace Oxide.Plugins
             }
         }
 
+        // Only using this hook because some plugins don't call OnPlayerLootEnd.
+        private void OnLootEntityEnd(BasePlayer player, BaseCombatEntity entity)
+        {
+            DestroyUi(player);
+        }
+
         #endregion OxideHooks
 
         #region Commands
