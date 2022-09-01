@@ -12,7 +12,7 @@ using UnityEngine;
 
 namespace Oxide.Plugins
 {
-    [Info("Sort Button", "MON@H", "2.0.0")]
+    [Info("Sort Button", "MON@H", "2.0.1")]
     [Description("Adds a sort button to storage boxes, allowing you to sort items by name or category")]
     internal class SortButton : CovalencePlugin
     {
@@ -26,6 +26,7 @@ namespace Oxide.Plugins
         private const string PermissionUse = "sortbutton.use";
         private const string GUIPanelName = "UISortButton";
 
+        private const int MaxRows = 8;
         private const float BaseYOffset = 112;
         private const float YOffsetPerRow = 62;
         private const float SortButtonWidth = 79;
@@ -53,6 +54,7 @@ namespace Oxide.Plugins
             (BaseYOffset + YOffsetPerRow * 5).ToString(),
             (BaseYOffset + YOffsetPerRow * 6).ToString(),
             (BaseYOffset + YOffsetPerRow * 7).ToString(),
+            (BaseYOffset + YOffsetPerRow * 8).ToString(),
         };
 
         // Since 2020/08, some loot panels still use 21px, while most other panels use 23px.
@@ -463,7 +465,7 @@ namespace Oxide.Plugins
         {
             if (lootPanelName == "generic_resizable")
             {
-                int numRows = Math.Min(1 + (container.capacity - 1) / 6, 7);
+                int numRows = Math.Min(1 + (container.capacity - 1) / 6, MaxRows);
                 offsetYString = OffsetYByRow[numRows - 1];
                 return true;
             }
