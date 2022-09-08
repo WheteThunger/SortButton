@@ -45,17 +45,7 @@ namespace Oxide.Plugins
             ["vendingmachine.storage"] = (BaseYOffset + YOffsetPerRow * 5).ToString(),
         };
 
-        private readonly string[] OffsetYByRow = new string[]
-        {
-            (BaseYOffset + YOffsetPerRow * 1).ToString(),
-            (BaseYOffset + YOffsetPerRow * 2).ToString(),
-            (BaseYOffset + YOffsetPerRow * 3).ToString(),
-            (BaseYOffset + YOffsetPerRow * 4).ToString(),
-            (BaseYOffset + YOffsetPerRow * 5).ToString(),
-            (BaseYOffset + YOffsetPerRow * 6).ToString(),
-            (BaseYOffset + YOffsetPerRow * 7).ToString(),
-            (BaseYOffset + YOffsetPerRow * 8).ToString(),
-        };
+        private readonly string[] OffsetYByRow = new string[MaxRows];
 
         // Since 2020/08, some loot panels still use 21px, while most other panels use 23px.
         private readonly Dictionary<string, string> HeightOverrideByLootPanel = new Dictionary<string, string>
@@ -96,6 +86,11 @@ namespace Oxide.Plugins
                 Enabled = _configData.DefaultEnabled,
                 SortByCategory = _configData.DefaultSortByCategory,
             };
+
+            for (var i = 0; i < MaxRows; i++)
+            {
+                OffsetYByRow[i] = (BaseYOffset + YOffsetPerRow * (i + 1)).ToString();
+            }
         }
 
         private void OnServerInitialized()
