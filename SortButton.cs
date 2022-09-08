@@ -12,7 +12,7 @@ using UnityEngine;
 
 namespace Oxide.Plugins
 {
-    [Info("Sort Button", "MON@H", "2.0.1")]
+    [Info("Sort Button", "MON@H", "2.0.2")]
     [Description("Adds a sort button to storage boxes, allowing you to sort items by name or category")]
     internal class SortButton : CovalencePlugin
     {
@@ -68,6 +68,9 @@ namespace Oxide.Plugins
 
         // Parameterize the cached UI JSON with the arguments stored in this array.
         private readonly string[] _uiArguments = new string[6];
+
+        // Keep track of UI viewers to reduce unnecessary calls to destroy the UI.
+        private readonly HashSet<ulong> _uiViewers = new HashSet<ulong>();
 
         #endregion Fields
 
@@ -543,6 +546,9 @@ namespace Oxide.Plugins
 
         private void CreateButtonUI(BasePlayer player, string offsetXString, string offsetYString, string heightString, bool sortByCategory)
         {
+            if (!_uiViewers.Add(player.userID))
+                return;
+
             if (_cachedUI == null)
             {
                 CuiElementContainer elements = new CuiElementContainer();
@@ -650,8 +656,11 @@ namespace Oxide.Plugins
             }
         }
 
-        private static void DestroyUi(BasePlayer player)
+        private void DestroyUi(BasePlayer player)
         {
+            if (!_uiViewers.Remove(player.userID))
+                return;
+
             CuiHelper.DestroyUi(player, GUIPanelName);
         }
 
