@@ -12,7 +12,7 @@ using UnityEngine;
 
 namespace Oxide.Plugins
 {
-    [Info("Sort Button", "MON@H", "2.0.2")]
+    [Info("Sort Button", "MON@H", "2.0.3")]
     [Description("Adds a sort button to storage boxes, allowing you to sort items by name or category")]
     internal class SortButton : CovalencePlugin
     {
@@ -27,7 +27,7 @@ namespace Oxide.Plugins
         private const string GUIPanelName = "UISortButton";
 
         private const int MaxRows = 8;
-        private const float BaseYOffset = 112;
+        private const float BaseYOffset = 113.5f;
         private const float YOffsetPerRow = 62;
         private const float SortButtonWidth = 79;
         private const float SortOrderButtonWidthString = 17;
@@ -41,7 +41,7 @@ namespace Oxide.Plugins
             ["generic"] = (BaseYOffset + YOffsetPerRow * 6).ToString(),
             ["genericsmall"] = (BaseYOffset + YOffsetPerRow).ToString(),
             ["largefurnace"] = "395",
-            ["toolcupboard"] = "560",
+            ["toolcupboard"] = "595",
             ["vendingmachine.storage"] = (BaseYOffset + YOffsetPerRow * 5).ToString(),
         };
 
@@ -53,7 +53,7 @@ namespace Oxide.Plugins
             ["dropboxcontents"] = "21",
             ["furnace"] = "21",
             ["largefurnace"] = "21",
-            ["toolcupboard"] = "21",
+            ["toolcupboard"] = "21.5",
             ["vendingmachine.storage"] = "21",
         };
 
