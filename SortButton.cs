@@ -801,6 +801,8 @@ namespace Oxide.Plugins
                 ["assets/prefabs/deployable/vendingmachine/vendingmachine.deployed.prefab"] = new ContainerConfiguration(),
                 ["assets/prefabs/deployable/woodenbox/woodbox_deployed.prefab"] = new ContainerConfiguration(),
                 ["assets/prefabs/misc/halloween/coffin/coffinstorage.prefab"] = new ContainerConfiguration(),
+                ["assets/prefabs/misc/decor_dlc/storagebarrel/storage_barrel_b.prefab"] = new ContainerConfiguration(),
+                ["assets/prefabs/misc/decor_dlc/storagebarrel/storage_barrel_c.prefab"] = new ContainerConfiguration(),
             };
 
             [JsonProperty("Containers by skin ID")]

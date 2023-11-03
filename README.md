@@ -100,6 +100,14 @@ Default configuration:
     "assets/prefabs/misc/halloween/coffin/coffinstorage.prefab": {
       "Enabled": true,
       "OffsetX": 476.5
+    },
+    "assets/prefabs/misc/decor_dlc/storagebarrel/storage_barrel_b.prefab": {
+      "Enabled": true,
+      "OffsetX": 476.5
+    },
+    "assets/prefabs/misc/decor_dlc/storagebarrel/storage_barrel_c.prefab": {
+      "Enabled": true,
+      "OffsetX": 476.5
     }
   },
   "Containers by skin ID": {}
