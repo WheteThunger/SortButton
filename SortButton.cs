@@ -12,7 +12,7 @@ using UnityEngine;
 
 namespace Oxide.Plugins
 {
-    [Info("Sort Button", "MON@H", "2.0.3")]
+    [Info("Sort Button", "MON@H", "2.1.0")]
     [Description("Adds a sort button to storage boxes, allowing you to sort items by name or category")]
     internal class SortButton : CovalencePlugin
     {
