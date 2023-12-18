@@ -12,7 +12,7 @@ using UnityEngine;
 
 namespace Oxide.Plugins
 {
-    [Info("Sort Button", "MON@H", "2.1.0")]
+    [Info("Sort Button", "MON@H", "2.2.0")]
     [Description("Adds a sort button to storage boxes, allowing you to sort items by name or category")]
     internal class SortButton : CovalencePlugin
     {
@@ -50,6 +50,7 @@ namespace Oxide.Plugins
         // Since 2020/08, some loot panels still use 21px, while most other panels use 23px.
         private readonly Dictionary<string, string> HeightOverrideByLootPanel = new Dictionary<string, string>
         {
+            ["animal-storage"] = "21",
             ["dropboxcontents"] = "21",
             ["furnace"] = "21",
             ["largefurnace"] = "21",
@@ -111,7 +112,7 @@ namespace Oxide.Plugins
             }
         }
 
-        private void OnLootEntity(BasePlayer basePlayer, StorageContainer entity)
+        private void OnLootEntity(BasePlayer basePlayer, BaseEntity entity)
         {
             HandleOnLootEntity(basePlayer, entity, delay: true);
         }
@@ -355,13 +356,17 @@ namespace Oxide.Plugins
 
         #region Core Methods
 
-        private void HandleOnLootEntityDelayed(BasePlayer basePlayer, StorageContainer entity, string offsetXString, bool sortByCategory)
+        private void HandleOnLootEntityDelayed(BasePlayer basePlayer, BaseEntity entity, string offsetXString, bool sortByCategory)
         {
             // Sorting loot panels with multiple containers is not supported at this time.
             if (basePlayer.inventory.loot.containers.Count != 1)
                 return;
 
             ItemContainer container = basePlayer.inventory.loot.containers.FirstOrDefault();
+
+            // Don't show the sort button for the ridable horse equipment inventory.
+            if (entity is BaseRidableAnimal animal && container != animal.storageInventory)
+                return;
 
             string lootPanelName = DetermineLootPanelName(entity);
             string offsetYString;
@@ -377,7 +382,7 @@ namespace Oxide.Plugins
             CreateButtonUI(basePlayer, offsetXString, offsetYString, heightString, sortByCategory);
         }
 
-        private void HandleOnLootEntity(BasePlayer basePlayer, StorageContainer entity, bool delay = true)
+        private void HandleOnLootEntity(BasePlayer basePlayer, BaseEntity entity, bool delay = true)
         {
             if (basePlayer == null
                 || !permission.UserHasPermission(basePlayer.UserIDString, PermissionUse))
@@ -452,16 +457,20 @@ namespace Oxide.Plugins
             return true;
         }
 
-        private string DetermineLootPanelName(StorageContainer entity)
+        private string DetermineLootPanelName(BaseEntity entity)
         {
-            return (entity as Mailbox)?.ownerPanel
-                ?? (entity as StorageContainer)?.panelName
-                ?? "generic_resizable";
+            return entity switch
+            {
+                Mailbox mailbox => mailbox.ownerPanel,
+                StorageContainer storageContainer => storageContainer.panelName,
+                BaseRidableAnimal animal => animal.storagePanelName,
+                _ => "generic_resizable",
+            };
         }
 
         private bool TryDetermineYOffset(ItemContainer container, string lootPanelName, out string offsetYString)
         {
-            if (lootPanelName == "generic_resizable")
+            if (lootPanelName == "generic_resizable" || lootPanelName == "animal-storage")
             {
                 int numRows = Math.Min(1 + (container.capacity - 1) / 6, MaxRows);
                 offsetYString = OffsetYByRow[numRows - 1];
@@ -803,6 +812,7 @@ namespace Oxide.Plugins
                 ["assets/prefabs/misc/halloween/coffin/coffinstorage.prefab"] = new ContainerConfiguration(),
                 ["assets/prefabs/misc/decor_dlc/storagebarrel/storage_barrel_b.prefab"] = new ContainerConfiguration(),
                 ["assets/prefabs/misc/decor_dlc/storagebarrel/storage_barrel_c.prefab"] = new ContainerConfiguration(),
+                ["assets/rust.ai/nextai/testridablehorse.prefab"] = new ContainerConfiguration(),
             };
 
             [JsonProperty("Containers by skin ID")]

@@ -108,6 +108,10 @@ Default configuration:
     "assets/prefabs/misc/decor_dlc/storagebarrel/storage_barrel_c.prefab": {
       "Enabled": true,
       "OffsetX": 476.5
+    },
+    "assets/rust.ai/nextai/testridablehorse.prefab": {
+      "Enabled": true,
+      "OffsetX": 476.5
     }
   },
   "Containers by skin ID": {}
