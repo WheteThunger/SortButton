@@ -18,7 +18,7 @@ namespace Oxide.Plugins
     {
         #region Fields
 
-        private Configuration _configData;
+        private Configuration _config;
 
         [PluginReference]
         private readonly Plugin Clans, Friends;
@@ -34,7 +34,7 @@ namespace Oxide.Plugins
         private const string ButtonHeightString = "23";
 
         // When calculating sort button position, do it based on the loot panel to simplify configuration.
-        private readonly Dictionary<string, string> OffsetYByLootPanel = new Dictionary<string, string>
+        private readonly Dictionary<string, string> OffsetYByLootPanel = new()
         {
             ["dropboxcontents"] = (BaseYOffset + YOffsetPerRow * 2).ToString(),
             ["furnace"] = "277",
@@ -48,7 +48,7 @@ namespace Oxide.Plugins
         private readonly string[] OffsetYByRow = new string[MaxRows];
 
         // Since 2020/08, some loot panels still use 21px, while most other panels use 23px.
-        private readonly Dictionary<string, string> HeightOverrideByLootPanel = new Dictionary<string, string>
+        private readonly Dictionary<string, string> HeightOverrideByLootPanel = new()
         {
             ["animal-storage"] = "21",
             ["dropboxcontents"] = "21",
@@ -71,7 +71,7 @@ namespace Oxide.Plugins
         private readonly string[] _uiArguments = new string[6];
 
         // Keep track of UI viewers to reduce unnecessary calls to destroy the UI.
-        private readonly HashSet<ulong> _uiViewers = new HashSet<ulong>();
+        private readonly HashSet<ulong> _uiViewers = new();
 
         #endregion Fields
 
@@ -87,8 +87,8 @@ namespace Oxide.Plugins
 
             _defaultPlayerData = new PlayerData
             {
-                Enabled = _configData.DefaultEnabled,
-                SortByCategory = _configData.DefaultSortByCategory,
+                Enabled = _config.DefaultEnabled,
+                SortByCategory = _config.DefaultSortByCategory,
             };
 
             for (var i = 0; i < MaxRows; i++)
@@ -99,14 +99,14 @@ namespace Oxide.Plugins
 
         private void OnServerInitialized()
         {
-            _configData.OnServerInitialized(this);
+            _config.OnServerInitialized(this);
 
             SubscribeToHooks();
         }
 
         private void Unload()
         {
-            foreach (BasePlayer activePlayer in BasePlayer.activePlayerList)
+            foreach (var activePlayer in BasePlayer.activePlayerList)
             {
                 DestroyUi(activePlayer);
             }
@@ -119,7 +119,7 @@ namespace Oxide.Plugins
 
         private void OnPlayerLootEnd(PlayerLoot inventory)
         {
-            BasePlayer player = inventory.baseEntity;
+            var player = inventory.baseEntity;
             if (player != null)
             {
                 DestroyUi(player);
@@ -141,7 +141,7 @@ namespace Oxide.Plugins
             if (player.IsServer)
                 return;
 
-            BasePlayer basePlayer = player.Object as BasePlayer;
+            var basePlayer = player.Object as BasePlayer;
 
             if (!permission.UserHasPermission(basePlayer.UserIDString, PermissionUse))
             {
@@ -149,14 +149,14 @@ namespace Oxide.Plugins
                 return;
             }
 
-            PlayerData playerData = GetPlayerData(basePlayer.userID, createIfMissing: true);
+            var playerData = GetPlayerData(basePlayer.userID, createIfMissing: true);
 
             if (args == null || args.Length == 0)
             {
                 playerData.Enabled = !playerData.Enabled;
                 SaveData();
 
-                string enabledOrDisabledMessage = playerData.Enabled
+                var enabledOrDisabledMessage = playerData.Enabled
                     ? Lang(LangKeys.Format.Enabled, basePlayer.UserIDString)
                     : Lang(LangKeys.Format.Disabled, basePlayer.UserIDString);
 
@@ -171,7 +171,7 @@ namespace Oxide.Plugins
                     playerData.SortByCategory = !playerData.SortByCategory;
                     SaveData();
 
-                    string sortTypeLangKey = playerData.SortByCategory == true
+                    var sortTypeLangKey = playerData.SortByCategory
                         ? LangKeys.Format.Category
                         : LangKeys.Format.Name;
 
@@ -179,7 +179,7 @@ namespace Oxide.Plugins
                     return;
             }
 
-            PlayerSendMessage(basePlayer, Lang(LangKeys.Info.Help, basePlayer.UserIDString, _configData.Commands[0]));
+            PlayerSendMessage(basePlayer, Lang(LangKeys.Info.Help, basePlayer.UserIDString, _config.Commands[0]));
         }
 
         [Command("sortbutton.order")]
@@ -188,8 +188,8 @@ namespace Oxide.Plugins
             if (player.IsServer || !player.HasPermission(PermissionUse))
                 return;
 
-            BasePlayer basePlayer = player.Object as BasePlayer;
-            PlayerData playerData = GetPlayerData(basePlayer.userID, createIfMissing: true);
+            var basePlayer = player.Object as BasePlayer;
+            var playerData = GetPlayerData(basePlayer.userID, createIfMissing: true);
 
             playerData.SortByCategory = !playerData.SortByCategory;
             SaveData();
@@ -203,18 +203,18 @@ namespace Oxide.Plugins
             if (player.IsServer || !player.HasPermission(PermissionUse))
                 return;
 
-            BasePlayer basePlayer = player.Object as BasePlayer;
-            List<ItemContainer> containers = basePlayer.inventory.loot.containers;
+            var basePlayer = player.Object as BasePlayer;
+            var containers = basePlayer.inventory.loot.containers;
 
             // Sorting loot panels with multiple containers is not supported at this time.
             if (containers.Count != 1)
                 return;
 
-            BaseEntity entitySource = basePlayer.inventory.loot.entitySource;
+            var entitySource = basePlayer.inventory.loot.entitySource;
 
             // Verify the container is supported.
-            ContainerConfiguration containerConfiguration = _configData.GetContainerConfiguration(entitySource);
-            if (containerConfiguration == null || !containerConfiguration.Enabled)
+            var containerConfiguration = _config.GetContainerConfiguration(entitySource);
+            if (containerConfiguration is not { Enabled: true })
                 return;
 
             // Verify entity-specific checks like for drop boxes and vending machines.
@@ -222,18 +222,18 @@ namespace Oxide.Plugins
                 return;
 
             // Verify the player hasn't disabled the sort button.
-            PlayerData playerData = GetPlayerData(basePlayer.userID);
+            var playerData = GetPlayerData(basePlayer.userID);
             if (!playerData.Enabled)
                 return;
 
             // If the container is owned by another player, verify the looter is authorized to sort.
-            ulong ownerID = entitySource.OwnerID;
-            if (_configData.CheckOwnership && ownerID != 0 && !IsAlly(basePlayer.userID, ownerID))
+            var ownerID = entitySource.OwnerID;
+            if (_config.CheckOwnership && ownerID != 0 && !IsAlly(basePlayer.userID, ownerID))
                 return;
 
-            foreach (ItemContainer container in basePlayer.inventory.loot.containers)
+            foreach (var container in basePlayer.inventory.loot.containers)
             {
-                if (!CanPlayerSortContainer(basePlayer, container))
+                if (!IsSortableContainer(container))
                     continue;
 
                 SortContainer(container, basePlayer, playerData.SortByCategory);
@@ -258,14 +258,14 @@ namespace Oxide.Plugins
 
         private void SetupItemCategories()
         {
-            List<ItemCategory> itemCategories = Enum.GetValues(typeof(ItemCategory)).Cast<ItemCategory>().ToList();
+            var itemCategories = Enum.GetValues(typeof(ItemCategory)).Cast<ItemCategory>().ToList();
             itemCategories.Sort((a, b) => a.ToString().CompareTo(b.ToString()));
 
             _itemCategoryToSortIndex = new int[itemCategories.Count];
 
-            for (int i = 0; i < itemCategories.Count; i++)
+            for (var i = 0; i < itemCategories.Count; i++)
             {
-                ItemCategory itemCategory = itemCategories[i];
+                var itemCategory = itemCategories[i];
                 _itemCategoryToSortIndex[(int)itemCategory] = i;
             }
         }
@@ -277,27 +277,27 @@ namespace Oxide.Plugins
 
         private void AddCommands()
         {
-            if (_configData.Commands.Count == 0)
+            if (_config.Commands.Count == 0)
             {
-                _configData.Commands = new List<string>() { "sortbutton" };
+                _config.Commands = new List<string>() { "sortbutton" };
                 SaveConfig();
             }
 
-            foreach (string command in _configData.Commands)
+            foreach (var command in _config.Commands)
             {
                 AddCovalenceCommand(command, nameof(CmdSortButton));
             }
         }
 
-        private bool IsPluginLoaded(Plugin plugin) => plugin != null && plugin.IsLoaded;
+        private bool IsPluginLoaded(Plugin plugin) => plugin is { IsLoaded: true };
 
         private bool IsAlly(ulong playerId, ulong targetId)
         {
             if (playerId == targetId || IsOnSameTeam(playerId, targetId))
                 return true;
 
-            string playerIdString = playerId.ToString();
-            string targetIdString = targetId.ToString();
+            var playerIdString = playerId.ToString();
+            var targetIdString = targetId.ToString();
 
             return IsClanMemberOrAlly(playerIdString, targetIdString)
                 || IsFriend(playerIdString, targetIdString);
@@ -305,16 +305,12 @@ namespace Oxide.Plugins
 
         private bool IsClanMemberOrAlly(string playerId, string targetId)
         {
-            if (_configData.UseClans)
+            if (_config.UseClans)
             {
                 if (IsPluginLoaded(Clans))
-                {
                     return Clans.Call<bool>("IsMemberOrAlly", playerId, targetId);
-                }
-                else
-                {
-                    PrintError("UseClans is set to true, but plugin Clans is not loaded!");
-                }
+
+                PrintError("UseClans is set to true, but plugin Clans is not loaded!");
             }
 
             return false;
@@ -322,16 +318,12 @@ namespace Oxide.Plugins
 
         private bool IsFriend(string playerId, string targetId)
         {
-            if (_configData.UseFriends)
+            if (_config.UseFriends)
             {
                 if (IsPluginLoaded(Friends))
-                {
                     return Friends.Call<bool>("HasFriend", targetId, playerId);
-                }
-                else
-                {
-                    PrintError("UseFriends is set to true, but plugin Friends is not loaded!");
-                }
+
+                PrintError("UseFriends is set to true, but plugin Friends is not loaded!");
             }
 
             return false;
@@ -339,17 +331,17 @@ namespace Oxide.Plugins
 
         private bool IsOnSameTeam(ulong playerId, ulong targetId)
         {
-            if (!_configData.UseTeams)
+            if (!_config.UseTeams)
                 return false;
 
-            RelationshipManager.PlayerTeam playerTeam = RelationshipManager.ServerInstance.FindPlayersTeam(playerId);
+            var playerTeam = RelationshipManager.ServerInstance.FindPlayersTeam(playerId);
             return playerTeam?.members.Contains(targetId) ?? false;
         }
 
         private void PlayerSendMessage(BasePlayer player, string message)
         {
             message = Lang(LangKeys.Format.Prefix, player.UserIDString) + message;
-            player.SendConsoleCommand("chat.add", 2, _configData.SteamIDIcon, message);
+            player.SendConsoleCommand("chat.add", 2, _config.SteamIDIcon, message);
         }
 
         #endregion Helpers
@@ -362,19 +354,17 @@ namespace Oxide.Plugins
             if (basePlayer.inventory.loot.containers.Count != 1)
                 return;
 
-            ItemContainer container = basePlayer.inventory.loot.containers.FirstOrDefault();
+            var container = basePlayer.inventory.loot.containers.FirstOrDefault();
 
             // Don't show the sort button for the ridable horse equipment inventory.
             if (entity is BaseRidableAnimal animal && container != animal.storageInventory)
                 return;
 
-            string lootPanelName = DetermineLootPanelName(entity);
-            string offsetYString;
-            if (!TryDetermineYOffset(container, lootPanelName, out offsetYString))
+            var lootPanelName = DetermineLootPanelName(entity);
+            if (!TryDetermineYOffset(container, lootPanelName, out var offsetYString))
                 return;
 
-            string heightString;
-            if (!HeightOverrideByLootPanel.TryGetValue(lootPanelName, out heightString))
+            if (!HeightOverrideByLootPanel.TryGetValue(lootPanelName, out var heightString))
             {
                 heightString = ButtonHeightString;
             }
@@ -389,7 +379,7 @@ namespace Oxide.Plugins
                 return;
 
             // Verify the container is supported.
-            ContainerConfiguration containerConfiguration = _configData.GetContainerConfiguration(entity);
+            var containerConfiguration = _config.GetContainerConfiguration(entity);
             if (containerConfiguration == null || !containerConfiguration.Enabled)
                 return;
 
@@ -398,17 +388,17 @@ namespace Oxide.Plugins
                 return;
 
             // Verify the player hasn't disabled the sort button.
-            PlayerData playerData = GetPlayerData(basePlayer.userID);
+            var playerData = GetPlayerData(basePlayer.userID);
             if (!playerData.Enabled)
                 return;
 
             // If the container is owned by another player, verify the looter is authorized to sort.
-            ulong ownerID = entity.OwnerID;
-            if (_configData.CheckOwnership && ownerID != 0 && !IsAlly(basePlayer.userID, ownerID))
+            var ownerID = entity.OwnerID;
+            if (_config.CheckOwnership && ownerID != 0 && !IsAlly(basePlayer.userID, ownerID))
                 return;
 
-            string offsetXString = containerConfiguration.OffsetXString;
-            bool sortByCategory = playerData.SortByCategory;
+            var offsetXString = containerConfiguration.OffsetXString;
+            var sortByCategory = playerData.SortByCategory;
 
             if (delay)
             {
@@ -430,7 +420,7 @@ namespace Oxide.Plugins
             }
         }
 
-        private bool CanPlayerSortContainer(BasePlayer player, ItemContainer container)
+        private bool IsSortableContainer(ItemContainer container)
         {
             if (container.IsLocked()
                 || container.PlayerItemInputBlocked()
@@ -446,11 +436,11 @@ namespace Oxide.Plugins
             if (entity == null || entity.IsDestroyed)
                 return false;
 
-            DropBox dropBox = entity as DropBox;
+            var dropBox = entity as DropBox;
             if ((object)dropBox != null)
                 return dropBox.PlayerBehind(basePlayer);
 
-            VendingMachine vendingMachine = entity as VendingMachine;
+            var vendingMachine = entity as VendingMachine;
             if ((object)vendingMachine != null)
                 return vendingMachine.PlayerBehind(basePlayer);
 
@@ -472,7 +462,7 @@ namespace Oxide.Plugins
         {
             if (lootPanelName == "generic_resizable" || lootPanelName == "animal-storage")
             {
-                int numRows = Math.Min(1 + (container.capacity - 1) / 6, MaxRows);
+                var numRows = Math.Min(1 + (container.capacity - 1) / 6, MaxRows);
                 offsetYString = OffsetYByRow[numRows - 1];
                 return true;
             }
@@ -480,7 +470,6 @@ namespace Oxide.Plugins
             if (OffsetYByLootPanel.TryGetValue(lootPanelName, out offsetYString))
                 return true;
 
-            offsetYString = null;
             return false;
         }
 
@@ -488,15 +477,15 @@ namespace Oxide.Plugins
         {
             if (byCategory)
             {
-                int categoryIndex = _itemCategoryToSortIndex[(int)a.info.category];
-                int otherCategoryIndex = _itemCategoryToSortIndex[(int)b.info.category];
+                var categoryIndex = _itemCategoryToSortIndex[(int)a.info.category];
+                var otherCategoryIndex = _itemCategoryToSortIndex[(int)b.info.category];
 
-                int categoryComparison = categoryIndex.CompareTo(otherCategoryIndex);
+                var categoryComparison = categoryIndex.CompareTo(otherCategoryIndex);
                 if (categoryComparison != 0)
                     return categoryComparison;
             }
 
-            int nameComparison = a.info.displayName.translated.CompareTo(b.info.displayName.translated);
+            var nameComparison = a.info.displayName.translated.CompareTo(b.info.displayName.translated);
             if (nameComparison != 0)
                 return nameComparison;
 
@@ -505,13 +494,13 @@ namespace Oxide.Plugins
 
         private void SortContainer(ItemContainer container, BasePlayer initiator, bool byCategory)
         {
-            List<Item> itemList = Pool.GetList<Item>();
+            var itemList = Pool.GetList<Item>();
 
             if (container.entityOwner is BuildingPrivlidge)
             {
-                for (int i = container.itemList.Count - 1; i >= 0; i--)
+                for (var i = container.itemList.Count - 1; i >= 0; i--)
                 {
-                    Item item = container.itemList[i];
+                    var item = container.itemList[i];
                     if (item.position >= 24)
                         continue;
 
@@ -521,9 +510,9 @@ namespace Oxide.Plugins
             }
             else
             {
-                for (int i = container.itemList.Count - 1; i >= 0; i--)
+                for (var i = container.itemList.Count - 1; i >= 0; i--)
                 {
-                    Item item = container.itemList[i];
+                    var item = container.itemList[i];
                     item.RemoveFromContainer();
                     itemList.Add(item);
                 }
@@ -560,7 +549,7 @@ namespace Oxide.Plugins
 
             if (_cachedUI == null)
             {
-                CuiElementContainer elements = new CuiElementContainer();
+                var elements = new CuiElementContainer();
 
                 elements.Add(new CuiPanel
                 {
@@ -621,7 +610,7 @@ namespace Oxide.Plugins
                         FontSize = 12,
                         Align = TextAnchor.MiddleCenter,
                         Color = "0.77 0.92 0.67 0.8",
-                    }
+                    },
                 }, GUIPanelName);
 
                 _cachedUI = CuiHelper.ToJson(elements);
@@ -629,7 +618,7 @@ namespace Oxide.Plugins
                 // Escape braces for string.Format.
                 _cachedUI = _cachedUI.Replace("{", "{{").Replace("}", "}}");
 
-                for (int i = 0; i < _uiArguments.Length; i++)
+                for (var i = 0; i < _uiArguments.Length; i++)
                 {
                     // Unescape braces for intended placeholders.
                     _cachedUI = _cachedUI.Replace("{{" + i + "}}", "{" + i + "}");
@@ -658,7 +647,7 @@ namespace Oxide.Plugins
         {
             DestroyUi(player);
 
-            StorageContainer storage = player.inventory.loot?.entitySource as StorageContainer;
+            var storage = player.inventory.loot?.entitySource as StorageContainer;
             if ((object)storage != null)
             {
                 HandleOnLootEntity(player, storage, delay: false);
@@ -681,7 +670,7 @@ namespace Oxide.Plugins
 
         private class StoredData
         {
-            public readonly Hash<ulong, PlayerData> PlayerData = new Hash<ulong, PlayerData>();
+            public readonly Hash<ulong, PlayerData> PlayerData = new();
         }
 
         private class PlayerData
@@ -692,7 +681,7 @@ namespace Oxide.Plugins
 
         private PlayerData GetPlayerData(ulong userID, bool createIfMissing = false)
         {
-            PlayerData playerData = _storedData.PlayerData[userID];
+            var playerData = _storedData.PlayerData[userID];
             if (playerData != null)
                 return playerData;
 
@@ -700,8 +689,8 @@ namespace Oxide.Plugins
             {
                 playerData = new PlayerData()
                 {
-                    Enabled = _configData.DefaultEnabled,
-                    SortByCategory = _configData.DefaultSortByCategory,
+                    Enabled = _config.DefaultEnabled,
+                    SortByCategory = _config.DefaultSortByCategory,
                 };
 
                 _storedData.PlayerData[userID] = playerData;
@@ -756,6 +745,7 @@ namespace Oxide.Plugins
                     {
                         _offsetXString = OffsetX.ToString();
                     }
+
                     return _offsetXString;
                 }
             }
@@ -785,7 +775,7 @@ namespace Oxide.Plugins
             public ulong SteamIDIcon = 0;
 
             [JsonProperty("Chat command", ObjectCreationHandling = ObjectCreationHandling.Replace)]
-            public List<string> Commands = new List<string>()
+            public List<string> Commands = new()
             {
                 "sortbutton"
             };
@@ -793,34 +783,34 @@ namespace Oxide.Plugins
             [JsonProperty("Containers by short prefab name")]
             private Dictionary<string, ContainerConfiguration> ContainersByShortPrefabName = new Dictionary<string, ContainerConfiguration>
             {
-                ["assets/content/vehicles/boats/rhib/subents/rhib_storage.prefab"] = new ContainerConfiguration(),
-                ["assets/content/vehicles/boats/rowboat/subents/rowboat_storage.prefab"] = new ContainerConfiguration(),
-                ["assets/content/vehicles/modularcar/subents/modular_car_1mod_storage.prefab"] = new ContainerConfiguration(),
-                ["assets/content/vehicles/modularcar/subents/modular_car_camper_storage.prefab"] = new ContainerConfiguration(),
-                ["assets/content/vehicles/snowmobiles/subents/snowmobileitemstorage.prefab"] = new ContainerConfiguration(),
-                ["assets/content/vehicles/submarine/subents/submarineitemstorage.prefab"] = new ContainerConfiguration(),
-                ["assets/prefabs/deployable/composter/composter.prefab"] = new ContainerConfiguration(),
-                ["assets/prefabs/deployable/dropbox/dropbox.deployed.prefab"] = new ContainerConfiguration(),
-                ["assets/prefabs/deployable/fridge/fridge.deployed.prefab"] = new ContainerConfiguration(),
-                ["assets/prefabs/deployable/hitch & trough/hitchtrough.deployed.prefab"] = new ContainerConfiguration(),
-                ["assets/prefabs/deployable/hot air balloon/subents/hab_storage.prefab"] = new ContainerConfiguration(),
-                ["assets/prefabs/deployable/large wood storage/box.wooden.large.prefab"] = new ContainerConfiguration(),
-                ["assets/prefabs/deployable/small stash/small_stash_deployed.prefab"] = new ContainerConfiguration(),
-                ["assets/prefabs/deployable/tool cupboard/cupboard.tool.deployed.prefab"] = new ContainerConfiguration(),
-                ["assets/prefabs/deployable/tool cupboard/retro/cupboard.tool.retro.deployed.prefab"] = new ContainerConfiguration(),
-                ["assets/prefabs/deployable/vendingmachine/vendingmachine.deployed.prefab"] = new ContainerConfiguration(),
-                ["assets/prefabs/deployable/woodenbox/woodbox_deployed.prefab"] = new ContainerConfiguration(),
-                ["assets/prefabs/misc/halloween/coffin/coffinstorage.prefab"] = new ContainerConfiguration(),
-                ["assets/prefabs/misc/decor_dlc/storagebarrel/storage_barrel_b.prefab"] = new ContainerConfiguration(),
-                ["assets/prefabs/misc/decor_dlc/storagebarrel/storage_barrel_c.prefab"] = new ContainerConfiguration(),
-                ["assets/rust.ai/nextai/testridablehorse.prefab"] = new ContainerConfiguration(),
+                ["assets/content/vehicles/boats/rhib/subents/rhib_storage.prefab"] = new(),
+                ["assets/content/vehicles/boats/rowboat/subents/rowboat_storage.prefab"] = new(),
+                ["assets/content/vehicles/modularcar/subents/modular_car_1mod_storage.prefab"] = new(),
+                ["assets/content/vehicles/modularcar/subents/modular_car_camper_storage.prefab"] = new(),
+                ["assets/content/vehicles/snowmobiles/subents/snowmobileitemstorage.prefab"] = new(),
+                ["assets/content/vehicles/submarine/subents/submarineitemstorage.prefab"] = new(),
+                ["assets/prefabs/deployable/composter/composter.prefab"] = new(),
+                ["assets/prefabs/deployable/dropbox/dropbox.deployed.prefab"] = new(),
+                ["assets/prefabs/deployable/fridge/fridge.deployed.prefab"] = new(),
+                ["assets/prefabs/deployable/hitch & trough/hitchtrough.deployed.prefab"] = new(),
+                ["assets/prefabs/deployable/hot air balloon/subents/hab_storage.prefab"] = new(),
+                ["assets/prefabs/deployable/large wood storage/box.wooden.large.prefab"] = new(),
+                ["assets/prefabs/deployable/small stash/small_stash_deployed.prefab"] = new(),
+                ["assets/prefabs/deployable/tool cupboard/cupboard.tool.deployed.prefab"] = new(),
+                ["assets/prefabs/deployable/tool cupboard/retro/cupboard.tool.retro.deployed.prefab"] = new(),
+                ["assets/prefabs/deployable/vendingmachine/vendingmachine.deployed.prefab"] = new(),
+                ["assets/prefabs/deployable/woodenbox/woodbox_deployed.prefab"] = new(),
+                ["assets/prefabs/misc/halloween/coffin/coffinstorage.prefab"] = new(),
+                ["assets/prefabs/misc/decor_dlc/storagebarrel/storage_barrel_b.prefab"] = new(),
+                ["assets/prefabs/misc/decor_dlc/storagebarrel/storage_barrel_c.prefab"] = new(),
+                ["assets/rust.ai/nextai/testridablehorse.prefab"] = new(),
             };
 
             [JsonProperty("Containers by skin ID")]
-            private Dictionary<ulong, ContainerConfiguration> ContainersBySkinId = new Dictionary<ulong, ContainerConfiguration>();
+            private Dictionary<ulong, ContainerConfiguration> ContainersBySkinId = new();
 
             [JsonIgnore]
-            private Dictionary<uint, ContainerConfiguration> ContainersByPrefabId = new Dictionary<uint, ContainerConfiguration>();
+            private Dictionary<uint, ContainerConfiguration> ContainersByPrefabId = new();
 
             public void OnServerInitialized(SortButton plugin)
             {
@@ -839,16 +829,11 @@ namespace Oxide.Plugins
 
             public ContainerConfiguration GetContainerConfiguration(BaseEntity entity)
             {
-                ContainerConfiguration containerConfiguration;
-                if (entity.skinID != 0 && ContainersBySkinId.TryGetValue(entity.skinID, out containerConfiguration))
-                {
+                if (entity.skinID != 0 && ContainersBySkinId.TryGetValue(entity.skinID, out var containerConfiguration))
                     return containerConfiguration;
-                }
 
                 if (ContainersByPrefabId.TryGetValue(entity.prefabID, out containerConfiguration))
-                {
                     return containerConfiguration;
-                }
 
                 return null;
             }
@@ -887,24 +872,22 @@ namespace Oxide.Plugins
 
         private bool MaybeUpdateConfig(BaseConfiguration config)
         {
-            Dictionary<string, object> currentWithDefaults = config.ToDictionary();
-            Dictionary<string, object> currentRaw = Config.ToDictionary(x => x.Key, x => x.Value);
+            var currentWithDefaults = config.ToDictionary();
+            var currentRaw = Config.ToDictionary(x => x.Key, x => x.Value);
             return MaybeUpdateConfigSection(currentWithDefaults, currentRaw);
         }
 
         private bool MaybeUpdateConfigSection(Dictionary<string, object> currentWithDefaults, Dictionary<string, object> currentRaw)
         {
-            bool changed = false;
+            var changed = false;
 
-            foreach (string key in currentWithDefaults.Keys)
+            foreach (var key in currentWithDefaults.Keys)
             {
-                object currentRawValue;
-                if (currentRaw.TryGetValue(key, out currentRawValue))
+                if (currentRaw.TryGetValue(key, out var currentRawValue))
                 {
-                    Dictionary<string, object> defaultDictValue = currentWithDefaults[key] as Dictionary<string, object>;
-                    Dictionary<string, object> currentDictValue = currentRawValue as Dictionary<string, object>;
+                    var currentDictValue = currentRawValue as Dictionary<string, object>;
 
-                    if (defaultDictValue != null)
+                    if (currentWithDefaults[key] is Dictionary<string, object> defaultDictValue)
                     {
                         if (currentDictValue == null)
                         {
@@ -927,20 +910,20 @@ namespace Oxide.Plugins
             return changed;
         }
 
-        protected override void LoadDefaultConfig() => _configData = new Configuration();
+        protected override void LoadDefaultConfig() => _config = new Configuration();
 
         protected override void LoadConfig()
         {
             base.LoadConfig();
             try
             {
-                _configData = Config.ReadObject<Configuration>();
-                if (_configData == null)
+                _config = Config.ReadObject<Configuration>();
+                if (_config == null)
                 {
                     throw new JsonException();
                 }
 
-                if (MaybeUpdateConfig(_configData))
+                if (MaybeUpdateConfig(_config))
                 {
                     LogWarning("Configuration appears to be outdated; updating and saving");
                     SaveConfig();
@@ -957,7 +940,7 @@ namespace Oxide.Plugins
         protected override void SaveConfig()
         {
             Log($"Configuration changes saved to {Name}.json");
-            Config.WriteObject(_configData, true);
+            Config.WriteObject(_config, true);
         }
 
         #endregion Configuration Helpers
