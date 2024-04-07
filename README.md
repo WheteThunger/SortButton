@@ -89,6 +89,10 @@ Default configuration:
       "Enabled": true,
       "OffsetX": 476.5
     },
+    "assets/prefabs/deployable/tool cupboard/retro/cupboard.tool.retro.deployed.prefab": {
+      "Enabled": true,
+      "OffsetX": 476.5
+    },
     "assets/prefabs/deployable/vendingmachine/vendingmachine.deployed.prefab": {
       "Enabled": true,
       "OffsetX": 476.5

@@ -807,6 +807,7 @@ namespace Oxide.Plugins
                 ["assets/prefabs/deployable/large wood storage/box.wooden.large.prefab"] = new ContainerConfiguration(),
                 ["assets/prefabs/deployable/small stash/small_stash_deployed.prefab"] = new ContainerConfiguration(),
                 ["assets/prefabs/deployable/tool cupboard/cupboard.tool.deployed.prefab"] = new ContainerConfiguration(),
+                ["assets/prefabs/deployable/tool cupboard/retro/cupboard.tool.retro.deployed.prefab"] = new ContainerConfiguration(),
                 ["assets/prefabs/deployable/vendingmachine/vendingmachine.deployed.prefab"] = new ContainerConfiguration(),
                 ["assets/prefabs/deployable/woodenbox/woodbox_deployed.prefab"] = new ContainerConfiguration(),
                 ["assets/prefabs/misc/halloween/coffin/coffinstorage.prefab"] = new ContainerConfiguration(),
