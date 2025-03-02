@@ -357,7 +357,8 @@ namespace Oxide.Plugins
             var container = basePlayer.inventory.loot.containers.FirstOrDefault();
 
             // Don't show the sort button for the ridable horse equipment inventory.
-            if (entity is BaseRidableAnimal animal && container != animal.storageInventory)
+            if ((entity is BaseRidableAnimal animal && container != animal.storageInventory)
+                || (entity is RidableHorse2 horse && container != horse.storageInventory))
                 return;
 
             var lootPanelName = DetermineLootPanelName(entity);
@@ -454,6 +455,7 @@ namespace Oxide.Plugins
                 Mailbox mailbox => mailbox.ownerPanel,
                 StorageContainer storageContainer => storageContainer.panelName,
                 BaseRidableAnimal animal => animal.storagePanelName,
+                RidableHorse2 horse => horse.storagePanelName,
                 _ => "generic_resizable",
             };
         }
@@ -803,7 +805,8 @@ namespace Oxide.Plugins
                 ["assets/prefabs/misc/halloween/coffin/coffinstorage.prefab"] = new(),
                 ["assets/prefabs/misc/decor_dlc/storagebarrel/storage_barrel_b.prefab"] = new(),
                 ["assets/prefabs/misc/decor_dlc/storagebarrel/storage_barrel_c.prefab"] = new(),
-                ["assets/rust.ai/nextai/testridablehorse.prefab"] = new(),
+                ["assets/content/vehicles/horse/_old/testridablehorse.prefab"] = new(),
+                ["assets/content/vehicles/horse/ridablehorse2.prefab"] = new(),
             };
 
             [JsonProperty("Containers by skin ID")]

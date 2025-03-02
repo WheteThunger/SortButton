@@ -113,7 +113,11 @@ Default configuration:
       "Enabled": true,
       "OffsetX": 476.5
     },
-    "assets/rust.ai/nextai/testridablehorse.prefab": {
+    "assets/content/vehicles/horse/_old/testridablehorse.prefab": {
+      "Enabled": true,
+      "OffsetX": 476.5
+    },
+    "assets/content/vehicles/horse/ridablehorse2.prefab": {
       "Enabled": true,
       "OffsetX": 476.5
     }
