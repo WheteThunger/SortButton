@@ -81,6 +81,10 @@ Default configuration:
       "Enabled": true,
       "OffsetX": 476.5
     },
+    "assets/prefabs/deployable/large wood storage/skins/medieval_large_wood_box/medieval.box.wooden.large.prefab": {
+      "Enabled": true,
+      "OffsetX": 476.5
+    },
     "assets/prefabs/deployable/small stash/small_stash_deployed.prefab": {
       "Enabled": true,
       "OffsetX": 476.5
@@ -90,6 +94,10 @@ Default configuration:
       "OffsetX": 476.5
     },
     "assets/prefabs/deployable/tool cupboard/retro/cupboard.tool.retro.deployed.prefab": {
+      "Enabled": true,
+      "OffsetX": 476.5
+    },
+    "assets/prefabs/deployable/tool cupboard/shockbyte/cupboard.tool.shockbyte.deployed.prefab": {
       "Enabled": true,
       "OffsetX": 476.5
     },

@@ -12,7 +12,7 @@ using UnityEngine;
 
 namespace Oxide.Plugins
 {
-    [Info("Sort Button", "MON@H", "2.3.0")]
+    [Info("Sort Button", "MON@H", "2.4.0")]
     [Description("Adds a sort button to storage boxes, allowing you to sort items by name or category")]
     internal class SortButton : CovalencePlugin
     {
@@ -797,9 +797,11 @@ namespace Oxide.Plugins
                 ["assets/prefabs/deployable/hitch & trough/hitchtrough.deployed.prefab"] = new(),
                 ["assets/prefabs/deployable/hot air balloon/subents/hab_storage.prefab"] = new(),
                 ["assets/prefabs/deployable/large wood storage/box.wooden.large.prefab"] = new(),
+                ["assets/prefabs/deployable/large wood storage/skins/medieval_large_wood_box/medieval.box.wooden.large.prefab"] = new(),
                 ["assets/prefabs/deployable/small stash/small_stash_deployed.prefab"] = new(),
                 ["assets/prefabs/deployable/tool cupboard/cupboard.tool.deployed.prefab"] = new(),
                 ["assets/prefabs/deployable/tool cupboard/retro/cupboard.tool.retro.deployed.prefab"] = new(),
+                ["assets/prefabs/deployable/tool cupboard/shockbyte/cupboard.tool.shockbyte.deployed.prefab"] = new(),
                 ["assets/prefabs/deployable/vendingmachine/vendingmachine.deployed.prefab"] = new(),
                 ["assets/prefabs/deployable/woodenbox/woodbox_deployed.prefab"] = new(),
                 ["assets/prefabs/misc/halloween/coffin/coffinstorage.prefab"] = new(),
