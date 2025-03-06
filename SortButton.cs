@@ -12,7 +12,7 @@ using UnityEngine;
 
 namespace Oxide.Plugins
 {
-    [Info("Sort Button", "MON@H", "2.4.0")]
+    [Info("Sort Button", "MON@H", "2.4.1")]
     [Description("Adds a sort button to storage boxes, allowing you to sort items by name or category")]
     internal class SortButton : CovalencePlugin
     {
@@ -755,6 +755,11 @@ namespace Oxide.Plugins
 
         private class Configuration : BaseConfiguration
         {
+            private static HashSet<string> OldRemovedPrefabs = new()
+            {
+                "assets/rust.ai/nextai/testridablehorse.prefab",
+            };
+
             [JsonProperty("Default enabled")]
             public bool DefaultEnabled = true;
 
@@ -783,7 +788,7 @@ namespace Oxide.Plugins
             };
 
             [JsonProperty("Containers by short prefab name")]
-            private Dictionary<string, ContainerConfiguration> ContainersByShortPrefabName = new Dictionary<string, ContainerConfiguration>
+            private Dictionary<string, ContainerConfiguration> ContainersByPrefabPath = new Dictionary<string, ContainerConfiguration>
             {
                 ["assets/content/vehicles/boats/rhib/subents/rhib_storage.prefab"] = new(),
                 ["assets/content/vehicles/boats/rowboat/subents/rowboat_storage.prefab"] = new(),
@@ -819,16 +824,40 @@ namespace Oxide.Plugins
 
             public void OnServerInitialized(SortButton plugin)
             {
-                foreach (KeyValuePair<string, ContainerConfiguration> entry in ContainersByShortPrefabName)
+                List<string> prefabsToRemove = null;
+
+                foreach (var (prefabPath, containerConfig) in ContainersByPrefabPath)
                 {
-                    uint prefabId = StringPool.Get(entry.Key);
-                    if (prefabId == 0)
+                    var baseEntity = GameManager.server.FindPrefab(prefabPath)?.GetComponent<BaseEntity>();
+                    if (baseEntity == null)
                     {
-                        plugin.LogError($"Invalid prefab in configuration: {entry.Key}");
+                        if (OldRemovedPrefabs.Contains(prefabPath))
+                        {
+                            prefabsToRemove ??= new List<string>();
+                            prefabsToRemove.Add(prefabPath);
+                        }
+                        else
+                        {
+                            plugin.LogError($"Invalid prefab in configuration: {prefabPath}");
+                        }
+
                         continue;
                     }
 
-                    ContainersByPrefabId[prefabId] = entry.Value;
+                    ContainersByPrefabId[baseEntity.prefabID] = containerConfig;
+                }
+
+                if (prefabsToRemove?.Count > 0)
+                {
+                    foreach (var prefabPath in prefabsToRemove)
+                    {
+                        ContainersByPrefabPath.Remove(prefabPath);
+                    }
+
+                    if (!UsingDefaults)
+                    {
+                        plugin.SaveConfig();
+                    }
                 }
             }
 
@@ -848,6 +877,9 @@ namespace Oxide.Plugins
 
         private class BaseConfiguration
         {
+            [JsonIgnore]
+            public bool UsingDefaults;
+
             public string ToJson() => JsonConvert.SerializeObject(this);
 
             public Dictionary<string, object> ToDictionary() => JsonHelper.Deserialize(ToJson()) as Dictionary<string, object>;
@@ -939,6 +971,7 @@ namespace Oxide.Plugins
                 LogError(e.Message);
                 LogWarning($"Configuration file {Name}.json is invalid; using defaults");
                 LoadDefaultConfig();
+                _config.UsingDefaults = true;
             }
         }
 
