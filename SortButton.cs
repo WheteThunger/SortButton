@@ -12,7 +12,7 @@ using UnityEngine;
 
 namespace Oxide.Plugins
 {
-    [Info("Sort Button", "MON@H", "2.4.1")]
+    [Info("Sort Button", "MON@H", "2.4.2")]
     [Description("Adds a sort button to storage boxes, allowing you to sort items by name or category")]
     internal class SortButton : CovalencePlugin
     {
@@ -357,8 +357,7 @@ namespace Oxide.Plugins
             var container = basePlayer.inventory.loot.containers.FirstOrDefault();
 
             // Don't show the sort button for the ridable horse equipment inventory.
-            if ((entity is BaseRidableAnimal animal && container != animal.storageInventory)
-                || (entity is RidableHorse2 horse && container != horse.storageInventory))
+            if ((entity is RidableHorse horse && container != horse.storageInventory))
                 return;
 
             var lootPanelName = DetermineLootPanelName(entity);
@@ -454,8 +453,7 @@ namespace Oxide.Plugins
             {
                 Mailbox mailbox => mailbox.ownerPanel,
                 StorageContainer storageContainer => storageContainer.panelName,
-                BaseRidableAnimal animal => animal.storagePanelName,
-                RidableHorse2 horse => horse.storagePanelName,
+                RidableHorse horse => horse.storagePanelName,
                 _ => "generic_resizable",
             };
         }
@@ -758,6 +756,8 @@ namespace Oxide.Plugins
             private static HashSet<string> OldRemovedPrefabs = new()
             {
                 "assets/rust.ai/nextai/testridablehorse.prefab",
+                "assets/content/vehicles/horse/ridablehorse2.prefab",
+                "assets/content/vehicles/horse/_old/testridablehorse.prefab",
             };
 
             [JsonProperty("Default enabled")]
@@ -812,8 +812,7 @@ namespace Oxide.Plugins
                 ["assets/prefabs/misc/halloween/coffin/coffinstorage.prefab"] = new(),
                 ["assets/prefabs/misc/decor_dlc/storagebarrel/storage_barrel_b.prefab"] = new(),
                 ["assets/prefabs/misc/decor_dlc/storagebarrel/storage_barrel_c.prefab"] = new(),
-                ["assets/content/vehicles/horse/_old/testridablehorse.prefab"] = new(),
-                ["assets/content/vehicles/horse/ridablehorse2.prefab"] = new(),
+                ["assets/content/vehicles/horse/ridablehorse.prefab"] = new(),
             };
 
             [JsonProperty("Containers by skin ID")]
