@@ -812,6 +812,10 @@ namespace Oxide.Plugins
                 ["assets/prefabs/misc/halloween/coffin/coffinstorage.prefab"] = new(),
                 ["assets/prefabs/misc/decor_dlc/storagebarrel/storage_barrel_b.prefab"] = new(),
                 ["assets/prefabs/misc/decor_dlc/storagebarrel/storage_barrel_c.prefab"] = new(),
+                ["assets/prefabs/deployable/large wood storage/skins/jungle_dlc_large_wood_box/jungle_dlc_storage_horizontal/wicker_barrel.prefab"] = new(),
+                ["assets/prefabs/deployable/large wood storage/skins/jungle_dlc_large_wood_box/jungle_dlc_storage_vertical/bamboo_barrel.prefab"] = new(),
+                ["assets/prefabs/deployable/large wood storage/skins/abyss_dlc_large_wood_box/abyss_dlc_storage_vertical/abyss_barrel_vertical.prefab"] = new(),
+                ["assets/prefabs/deployable/large wood storage/skins/abyss_dlc_large_wood_box/abyss_dlc_storage_horizontal/abyss_barrel_horizontal.prefab"] = new(),
                 ["assets/content/vehicles/horse/ridablehorse.prefab"] = new(),
             };
 
