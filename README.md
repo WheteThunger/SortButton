@@ -121,6 +121,22 @@ Default configuration:
       "Enabled": true,
       "OffsetX": 476.5
     },
+    "assets/prefabs/deployable/large wood storage/skins/jungle_dlc_large_wood_box/jungle_dlc_storage_horizontal/wicker_barrel.prefab": {
+      "Enabled": true,
+      "OffsetX": 476.5
+    },
+    "assets/prefabs/deployable/large wood storage/skins/jungle_dlc_large_wood_box/jungle_dlc_storage_vertical/bamboo_barrel.prefab": {
+      "Enabled": true,
+      "OffsetX": 476.5
+    },
+    "assets/prefabs/deployable/large wood storage/skins/abyss_dlc_large_wood_box/abyss_dlc_storage_vertical/abyss_barrel_vertical.prefab": {
+      "Enabled": true,
+      "OffsetX": 476.5
+    },
+    "assets/prefabs/deployable/large wood storage/skins/abyss_dlc_large_wood_box/abyss_dlc_storage_horizontal/abyss_barrel_horizontal.prefab": {
+      "Enabled": true,
+      "OffsetX": 476.5
+    },
     "assets/content/vehicles/horse/_old/testridablehorse.prefab": {
       "Enabled": true,
       "OffsetX": 476.5
