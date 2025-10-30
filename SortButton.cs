@@ -8,11 +8,12 @@ using Pool = Facepunch.Pool;
 using System.Collections.Generic;
 using System.Linq;
 using System;
+using System.Globalization;
 using UnityEngine;
 
 namespace Oxide.Plugins
 {
-    [Info("Sort Button", "WhiteThunder, MON@H", "2.5.0")]
+    [Info("Sort Button", "WhiteThunder, MON@H", "2.6.0")]
     [Description("Adds a sort button to storage boxes, allowing you to sort items by name or category")]
     internal class SortButton : CovalencePlugin
     {
@@ -436,12 +437,10 @@ namespace Oxide.Plugins
             if (entity == null || entity.IsDestroyed)
                 return false;
 
-            var dropBox = entity as DropBox;
-            if ((object)dropBox != null)
+            if (entity is DropBox dropBox)
                 return dropBox.PlayerBehind(basePlayer);
 
-            var vendingMachine = entity as VendingMachine;
-            if ((object)vendingMachine != null)
+            if (entity is VendingMachine vendingMachine)
                 return vendingMachine.PlayerBehind(basePlayer);
 
             return true;
@@ -460,7 +459,7 @@ namespace Oxide.Plugins
 
         private bool TryDetermineYOffset(ItemContainer container, string lootPanelName, out string offsetYString)
         {
-            if (lootPanelName == "generic_resizable" || lootPanelName == "animal-storage")
+            if (lootPanelName is "generic_resizable" or "animal-storage")
             {
                 var numRows = Math.Min(1 + (container.capacity - 1) / 6, MaxRows);
                 offsetYString = OffsetYByRow[numRows - 1];
@@ -494,7 +493,7 @@ namespace Oxide.Plugins
 
         private void SortContainer(ItemContainer container, BasePlayer initiator, bool byCategory)
         {
-            var itemList = Pool.GetList<Item>();
+            var itemList = Pool.Get<List<Item>>();
 
             if (container.entityOwner is BuildingPrivlidge)
             {
@@ -527,7 +526,7 @@ namespace Oxide.Plugins
                 itemList.Sort((a, b) => CompareItems(a, b, byCategory: false));
             }
 
-            foreach (Item item in itemList)
+            foreach (var item in itemList)
             {
                 if (!item.MoveToContainer(container))
                 {
@@ -535,7 +534,7 @@ namespace Oxide.Plugins
                 }
             }
 
-            Pool.FreeList(ref itemList);
+            Pool.FreeUnmanaged(ref itemList);
         }
 
         #endregion Core Methods
@@ -555,7 +554,7 @@ namespace Oxide.Plugins
                 {
                     Image =
                     {
-                        Color = "0 0 0 0"
+                        Color = "0 0 0 0",
                     },
                     RectTransform =
                     {
@@ -737,18 +736,7 @@ namespace Oxide.Plugins
             private string _offsetXString;
 
             [JsonIgnore]
-            public string OffsetXString
-            {
-                get
-                {
-                    if (_offsetXString == null)
-                    {
-                        _offsetXString = OffsetX.ToString();
-                    }
-
-                    return _offsetXString;
-                }
-            }
+            public string OffsetXString => _offsetXString ??= OffsetX.ToString(CultureInfo.InvariantCulture);
         }
 
         private class Configuration : BaseConfiguration
@@ -784,7 +772,7 @@ namespace Oxide.Plugins
             [JsonProperty("Chat command", ObjectCreationHandling = ObjectCreationHandling.Replace)]
             public List<string> Commands = new()
             {
-                "sortbutton"
+                "sortbutton",
             };
 
             [JsonProperty("Containers by short prefab name")]
@@ -792,6 +780,7 @@ namespace Oxide.Plugins
             {
                 ["assets/content/vehicles/boats/rhib/subents/rhib_storage.prefab"] = new(),
                 ["assets/content/vehicles/boats/rowboat/subents/rowboat_storage.prefab"] = new(),
+                ["assets/content/vehicles/horse/ridablehorse.prefab"] = new(),
                 ["assets/content/vehicles/modularcar/subents/modular_car_1mod_storage.prefab"] = new(),
                 ["assets/content/vehicles/modularcar/subents/modular_car_camper_storage.prefab"] = new(),
                 ["assets/content/vehicles/snowmobiles/subents/snowmobileitemstorage.prefab"] = new(),
@@ -802,21 +791,24 @@ namespace Oxide.Plugins
                 ["assets/prefabs/deployable/hitch & trough/hitchtrough.deployed.prefab"] = new(),
                 ["assets/prefabs/deployable/hot air balloon/subents/hab_storage.prefab"] = new(),
                 ["assets/prefabs/deployable/large wood storage/box.wooden.large.prefab"] = new(),
+                ["assets/prefabs/deployable/large wood storage/skins/abyss_dlc_large_wood_box/abyss_dlc_storage_horizontal/abyss_barrel_horizontal.prefab"] = new(),
+                ["assets/prefabs/deployable/large wood storage/skins/abyss_dlc_large_wood_box/abyss_dlc_storage_vertical/abyss_barrel_vertical.prefab"] = new(),
+                ["assets/prefabs/deployable/large wood storage/skins/jungle_dlc_large_wood_box/jungle_dlc_storage_horizontal/wicker_barrel.prefab"] = new(),
+                ["assets/prefabs/deployable/large wood storage/skins/jungle_dlc_large_wood_box/jungle_dlc_storage_vertical/bamboo_barrel.prefab"] = new(),
                 ["assets/prefabs/deployable/large wood storage/skins/medieval_large_wood_box/medieval.box.wooden.large.prefab"] = new(),
+                ["assets/prefabs/deployable/large wood storage/skins/warhammer_dlc_large_wood_box/krieg_storage_horizontal/krieg_storage_horizontal.prefab"] = new(),
+                ["assets/prefabs/deployable/large wood storage/skins/warhammer_dlc_large_wood_box/krieg_storage_vertical/krieg_storage_vertical.prefab"] = new(),
                 ["assets/prefabs/deployable/small stash/small_stash_deployed.prefab"] = new(),
                 ["assets/prefabs/deployable/tool cupboard/cupboard.tool.deployed.prefab"] = new(),
                 ["assets/prefabs/deployable/tool cupboard/retro/cupboard.tool.retro.deployed.prefab"] = new(),
                 ["assets/prefabs/deployable/tool cupboard/shockbyte/cupboard.tool.shockbyte.deployed.prefab"] = new(),
                 ["assets/prefabs/deployable/vendingmachine/vendingmachine.deployed.prefab"] = new(),
+                ["assets/prefabs/deployable/wall cabinet/electric.wallcabinet.deployed.prefab"] = new(),
+                ["assets/prefabs/deployable/woodenbox/skins/pilot_hazmat_wooden_box/pilot_hazmat_woodbox_deployed.prefab"] = new(),
                 ["assets/prefabs/deployable/woodenbox/woodbox_deployed.prefab"] = new(),
-                ["assets/prefabs/misc/halloween/coffin/coffinstorage.prefab"] = new(),
                 ["assets/prefabs/misc/decor_dlc/storagebarrel/storage_barrel_b.prefab"] = new(),
                 ["assets/prefabs/misc/decor_dlc/storagebarrel/storage_barrel_c.prefab"] = new(),
-                ["assets/prefabs/deployable/large wood storage/skins/jungle_dlc_large_wood_box/jungle_dlc_storage_horizontal/wicker_barrel.prefab"] = new(),
-                ["assets/prefabs/deployable/large wood storage/skins/jungle_dlc_large_wood_box/jungle_dlc_storage_vertical/bamboo_barrel.prefab"] = new(),
-                ["assets/prefabs/deployable/large wood storage/skins/abyss_dlc_large_wood_box/abyss_dlc_storage_vertical/abyss_barrel_vertical.prefab"] = new(),
-                ["assets/prefabs/deployable/large wood storage/skins/abyss_dlc_large_wood_box/abyss_dlc_storage_horizontal/abyss_barrel_horizontal.prefab"] = new(),
-                ["assets/content/vehicles/horse/ridablehorse.prefab"] = new(),
+                ["assets/prefabs/misc/halloween/coffin/coffinstorage.prefab"] = new(),
             };
 
             [JsonProperty("Containers by skin ID")]
@@ -827,7 +819,19 @@ namespace Oxide.Plugins
 
             public void OnServerInitialized(SortButton plugin)
             {
+                List<string> addedPrefabs = null;
                 List<string> prefabsToRemove = null;
+
+                foreach (var prefabPath in DiscoverStoragePrefabs())
+                {
+                    if (ContainersByPrefabPath.ContainsKey(prefabPath))
+                        continue;
+
+                    ContainersByPrefabPath[prefabPath] = new ContainerConfiguration();
+
+                    addedPrefabs ??= new List<string>();
+                    addedPrefabs.Add(prefabPath);
+                }
 
                 foreach (var (prefabPath, containerConfig) in ContainersByPrefabPath)
                 {
@@ -856,10 +860,15 @@ namespace Oxide.Plugins
                     {
                         ContainersByPrefabPath.Remove(prefabPath);
                     }
+                }
 
-                    if (!UsingDefaults)
+                if (!UsingDefaults && (prefabsToRemove?.Count > 0 || addedPrefabs?.Count > 0))
+                {
+                    plugin.SaveConfig();
+
+                    if (addedPrefabs?.Count > 0)
                     {
-                        plugin.SaveConfig();
+                        plugin.LogWarning($"Discovered and added {addedPrefabs.Count} storage entity prefabs to Configuration.\n - {string.Join("\n - ", addedPrefabs)}");
                     }
                 }
             }
@@ -873,6 +882,29 @@ namespace Oxide.Plugins
                     return containerConfiguration;
 
                 return null;
+            }
+
+            private List<string> DiscoverStoragePrefabs()
+            {
+                var prefabList = new List<string>();
+
+                foreach (var itemDefinition in ItemManager.itemList)
+                {
+                    var itemModDeployable = itemDefinition.GetComponent<ItemModDeployable>();
+                    if (itemModDeployable == null)
+                        continue;
+
+                    if (itemModDeployable.entityPrefab.GetEntity() is not (StorageContainer storageContainer and (BoxStorage or BuildingPrivlidge)))
+                        continue;
+
+                    // Filter out `unused_storage_barrel_a` and potentially others like it.
+                    if (storageContainer.PrefabName.Contains("unused"))
+                        continue;
+
+                    prefabList.Add(storageContainer.PrefabName);
+                }
+
+                return prefabList;
             }
         }
 
