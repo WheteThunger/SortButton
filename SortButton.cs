@@ -398,7 +398,12 @@ namespace Oxide.Plugins
             if (_config.CheckOwnership && ownerID != 0 && !IsAlly(basePlayer.userID, ownerID))
                 return;
 
-            var offsetXString = containerConfiguration.OffsetXString;
+            var industrialSortingEnabled = ConVar.Server.allowSorting
+                && entity is StorageContainer storageContainer
+                && storageContainer.allowSorting
+                && storageContainer.HasAttachedStorageAdaptor();
+
+            var offsetXString = containerConfiguration.GetOffsetXString(industrialSortingEnabled);
             var sortByCategory = playerData.SortByCategory;
 
             if (delay)
@@ -726,17 +731,29 @@ namespace Oxide.Plugins
 
         private class ContainerConfiguration
         {
+            private const float DefaultOffsetX = 476.5f;
+            private const float XOffsetForIndustrialAdapter = 49f;
+            private const float MaxOffsetXForIndustrialAdapterAdjustment = DefaultOffsetX - XOffsetForIndustrialAdapter;
+
             [JsonProperty("Enabled")]
             public bool Enabled = true;
 
             [JsonProperty("OffsetX")]
-            public float OffsetX = 476.5f;
+            public float OffsetX = DefaultOffsetX;
 
             [JsonIgnore]
             private string _offsetXString;
 
             [JsonIgnore]
-            public string OffsetXString => _offsetXString ??= OffsetX.ToString(CultureInfo.InvariantCulture);
+            private string _offsetXStringForIndustrialAdapter;
+
+            public string GetOffsetXString(bool industrialSortingEnabled)
+            {
+                if (industrialSortingEnabled && OffsetX >= MaxOffsetXForIndustrialAdapterAdjustment)
+                    return _offsetXStringForIndustrialAdapter ??= MaxOffsetXForIndustrialAdapterAdjustment.ToString(CultureInfo.InvariantCulture);
+
+                return _offsetXString ??= OffsetX.ToString(CultureInfo.InvariantCulture);
+            }
         }
 
         private class Configuration : BaseConfiguration
