@@ -24,6 +24,7 @@ Default configuration:
 {
   "Default enabled": true,
   "Default sort by category": true,
+  "Hide sort button while industrial adaptor is attached": false,
   "Check ownership": true,
   "Use Clans": true,
   "Use Friends": true,
@@ -164,6 +165,7 @@ Default configuration:
 
 - `Default enabled` (`true` or `false`) -- While `true`, the sort button will be enabled for players by default. Players can toggle the sort button with the `sortbutton` command.
 - `Default sort by category` (`true` or `false`) -- While `true`, the sort button will use category mode by default. Players can toggle the mode with the `sortbutton <sort | type>` command.
+- `Hide sort button while industrial adaptor is attached` (`true` or `false`) -- While `true`, the sort button will be hidden if an industrial adaptor is connected to the container.
 - `Check ownership` (`true` or `false`) -- While `true`, players can only sort containers owned by them or teammates/friends/clanmates (if those settings are enabled). Regardless of this setting, all players can sort unowned containers such as vehicle containers.
 - `Use Clans` (`true` or `false`) -- While `true`, players can sort containers owned by their clanmates while `Check ownership` is enabled.
 - `Use Friends` (`true` or `false`) -- While `true`, players can sort containers owned by their friends while `Check ownership` is enabled.

@@ -403,6 +403,9 @@ namespace Oxide.Plugins
                 && storageContainer.allowSorting
                 && storageContainer.HasAttachedStorageAdaptor();
 
+            if (_config.HideWhenIndustrialAdapterPresent && industrialSortingEnabled)
+                return;
+
             var offsetXString = containerConfiguration.GetOffsetXString(industrialSortingEnabled);
             var sortByCategory = playerData.SortByCategory;
 
@@ -770,6 +773,9 @@ namespace Oxide.Plugins
 
             [JsonProperty("Default sort by category")]
             public bool DefaultSortByCategory = true;
+
+            [JsonProperty("Hide sort button while industrial adaptor is attached")]
+            public bool HideWhenIndustrialAdapterPresent = false;
 
             [JsonProperty("Check ownership")]
             public bool CheckOwnership = true;
