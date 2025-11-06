@@ -349,6 +349,32 @@ namespace Oxide.Plugins
 
         #region Core Methods
 
+        private static T GetChildEntity<T>(BaseEntity entity) where T : BaseEntity
+        {
+            foreach (var child in entity.children)
+            {
+                var childOfType = child as T;
+                if (childOfType != null)
+                    return childOfType;
+            }
+
+            return null;
+        }
+
+        private static bool HasIndustrialAdaptor(BaseEntity entity, out IndustrialStorageAdaptor adaptor)
+        {
+            adaptor = null;
+
+            if (entity is not StorageContainer storageContainer)
+                return false;
+
+            if (!storageContainer.allowSorting)
+                return false;
+
+            adaptor = GetChildEntity<IndustrialStorageAdaptor>(storageContainer);
+            return adaptor != null;
+        }
+
         private void HandleOnLootEntityDelayed(BasePlayer basePlayer, BaseEntity entity, string offsetXString, bool sortByCategory)
         {
             // Sorting loot panels with multiple containers is not supported at this time.
@@ -398,10 +424,11 @@ namespace Oxide.Plugins
             if (_config.CheckOwnership && ownerID != 0 && !IsAlly(basePlayer.userID, ownerID))
                 return;
 
-            var industrialSortingEnabled = ConVar.Server.allowSorting
-                && entity is StorageContainer storageContainer
-                && storageContainer.allowSorting
-                && storageContainer.HasAttachedStorageAdaptor();
+            // If industrial adaptor is attached and powered, do not show the sort button.
+            // If not powered, show the sort button, but potentially with an offset position to avoid overlap.
+            var industrialSortingEnabled = HasIndustrialAdaptor(entity, out var adaptor);
+            if (industrialSortingEnabled && adaptor.IsPowered())
+                return;
 
             var offsetXString = containerConfiguration.GetOffsetXString(industrialSortingEnabled);
             var sortByCategory = playerData.SortByCategory;
