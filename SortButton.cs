@@ -842,6 +842,7 @@ namespace Oxide.Plugins
                 ["assets/prefabs/deployable/large wood storage/skins/medieval_large_wood_box/medieval.box.wooden.large.prefab"] = new(),
                 ["assets/prefabs/deployable/large wood storage/skins/warhammer_dlc_large_wood_box/krieg_storage_horizontal/krieg_storage_horizontal.prefab"] = new(),
                 ["assets/prefabs/deployable/large wood storage/skins/warhammer_dlc_large_wood_box/krieg_storage_vertical/krieg_storage_vertical.prefab"] = new(),
+                ["assets/prefabs/deployable/minifridge/minifridge.deployed.prefab"] = new(),
                 ["assets/prefabs/deployable/small stash/small_stash_deployed.prefab"] = new(),
                 ["assets/prefabs/deployable/tool cupboard/cupboard.tool.deployed.prefab"] = new(),
                 ["assets/prefabs/deployable/tool cupboard/retro/cupboard.tool.retro.deployed.prefab"] = new(),
@@ -938,14 +939,15 @@ namespace Oxide.Plugins
                     if (itemModDeployable == null)
                         continue;
 
-                    if (itemModDeployable.entityPrefab.GetEntity() is not (StorageContainer storageContainer and (BoxStorage or BuildingPrivlidge)))
+                    var deployableEntity = itemModDeployable.entityPrefab.GetEntity();
+                    if (deployableEntity is not (BoxStorage or BuildingPrivlidge or Fridge))
                         continue;
 
                     // Filter out `unused_storage_barrel_a` and potentially others like it.
-                    if (storageContainer.PrefabName.Contains("unused"))
+                    if (deployableEntity.PrefabName.Contains("unused"))
                         continue;
 
-                    prefabList.Add(storageContainer.PrefabName);
+                    prefabList.Add(deployableEntity.PrefabName);
                 }
 
                 return prefabList;

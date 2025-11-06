@@ -113,6 +113,10 @@ Default configuration:
       "Enabled": true,
       "OffsetX": 476.5
     },
+    "assets/prefabs/deployable/minifridge/minifridge.deployed.prefab": {
+      "Enabled": true,
+      "OffsetX": 476.5
+    },
     "assets/prefabs/deployable/small stash/small_stash_deployed.prefab": {
       "Enabled": true,
       "OffsetX": 476.5
