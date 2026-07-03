@@ -13,7 +13,7 @@ using UnityEngine;
 
 namespace Oxide.Plugins
 {
-    [Info("Sort Button", "WhiteThunder, MON@H", "2.7.0")]
+    [Info("Sort Button", "WhiteThunder, MON@H", "2.8.0")]
     [Description("Adds a sort button to storage boxes, allowing you to sort items by name or category")]
     internal class SortButton : CovalencePlugin
     {
@@ -244,6 +244,22 @@ namespace Oxide.Plugins
         #endregion Commands
 
         #region Helpers
+
+        private static string[] FindPrefabsOfType<T>() where T : BaseEntity
+        {
+            var prefabList = new List<string>();
+
+            foreach (var assetPath in GameManifest.Current.entities)
+            {
+                var entity = GameManager.server.FindPrefab(assetPath)?.GetComponent<T>();
+                if (entity == null)
+                    continue;
+
+                prefabList.Add(entity.PrefabName);
+            }
+
+            return prefabList.ToArray();
+        }
 
         private void UnsubscribeFromHooks()
         {
@@ -867,7 +883,7 @@ namespace Oxide.Plugins
                 List<string> addedPrefabs = null;
                 List<string> prefabsToRemove = null;
 
-                foreach (var prefabPath in DiscoverStoragePrefabs())
+                foreach (var prefabPath in DiscoverDeployableStoragePrefabs().Concat(DiscoverBoxStoragePrefabs()))
                 {
                     if (ContainersByPrefabPath.ContainsKey(prefabPath))
                         continue;
@@ -929,7 +945,7 @@ namespace Oxide.Plugins
                 return null;
             }
 
-            private List<string> DiscoverStoragePrefabs()
+            private List<string> DiscoverDeployableStoragePrefabs()
             {
                 var prefabList = new List<string>();
 
@@ -948,6 +964,25 @@ namespace Oxide.Plugins
                         continue;
 
                     prefabList.Add(deployableEntity.PrefabName);
+                }
+
+                return prefabList;
+            }
+
+            private List<string> DiscoverBoxStoragePrefabs()
+            {
+                var prefabList = new List<string>();
+
+                foreach (var prefabPath in FindPrefabsOfType<BoxStorage>())
+                {
+                    if (prefabPath.Contains("unused"))
+                        continue;
+
+                    // Just discover apartment storage prefabs for now, since others are discovered as deployables.
+                    if (!prefabPath.Contains("apartment"))
+                        continue;
+
+                    prefabList.Add(prefabPath);
                 }
 
                 return prefabList;
